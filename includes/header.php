@@ -2,8 +2,6 @@
 // TƏHLÜKƏSİZLİK VƏ QURAŞDIRMA YOXLANIŞI
 $db_file = __DIR__ . '/../config/db.php';
 if (!file_exists($db_file)) {
-    // Əgər config/db.php faylı yoxdursa (sistem qurulmayıbsa), 
-    // ölümcül xəta vermək əvəzinə istifadəçini quraşdırma səhifəsinə at
     header("Location: install.php");
     exit;
 }
@@ -56,30 +54,34 @@ if(isset($_SESSION['cart'])) {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
         
-        /* Premium arxa plan naxışı */
         .hero-pattern {
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
+        
+        /* Hamburger Animasiyası üçün */
+        .menu-btn-lines div { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .menu-btn:hover .menu-btn-lines div { width: 100%; }
     </style>
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
 
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+    <!-- Əsas Header -->
+    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-40 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             
             <!-- Logo -->
-            <a href="index.php" class="flex items-center gap-3 group">
-                <div class="w-11 h-11 bg-ixlas-600 text-white rounded-xl flex items-center justify-center text-xl group-hover:bg-ixlas-700 transition-colors shadow-lg shadow-ixlas-500/30">
+            <a href="index.php" class="flex items-center gap-3 group z-50">
+                <div class="w-10 h-10 md:w-11 md:h-11 bg-ixlas-600 text-white rounded-xl flex items-center justify-center text-lg md:text-xl group-hover:bg-ixlas-700 transition-colors shadow-lg shadow-ixlas-500/30">
                     <i class="fa-solid fa-signal"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight leading-none">İxlas<span class="text-ixlas-600">Telekom</span></h1>
-                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Rəsmi Satış</span>
+                    <h1 class="text-xl md:text-2xl font-extrabold text-gray-900 tracking-tight leading-none">İxlas<span class="text-ixlas-600">Telekom</span></h1>
+                    <span class="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden sm:block">Rəsmi Satış</span>
                 </div>
             </a>
 
-            <!-- Navigation (Dinamik) -->
-            <nav class="hidden md:flex items-center gap-8">
+            <!-- Navigation (Yalnız Kompüterdə Görünür) -->
+            <nav class="hidden lg:flex items-center gap-8">
                 <a href="index.php" class="text-sm font-bold text-gray-900 hover:text-ixlas-600 transition-colors">Ana Səhifə</a>
                 <?php foreach($nav_categories as $cat): ?>
                     <a href="category.php?id=<?= $cat['id'] ?>" class="text-sm font-bold text-gray-600 hover:text-ixlas-600 transition-colors">
@@ -88,32 +90,146 @@ if(isset($_SESSION['cart'])) {
                 <?php endforeach; ?>
             </nav>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 md:gap-4 z-50">
                 
-                <!-- YENİLƏNMİŞ AXTARIŞ FORMU -->
+                <!-- Axtarış Formu (Kompüter üçün input, Mobil üçün yalnız İkon) -->
                 <form action="search.php" method="GET" class="relative hidden sm:block group">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-ixlas-500 transition-colors"></i>
-                    <input type="text" name="q" placeholder="Məhsul axtar..." required class="pl-10 pr-4 py-2.5 bg-gray-100 border border-transparent rounded-full text-sm font-medium focus:border-ixlas-500 focus:bg-white focus:ring-2 focus:ring-ixlas-100 outline-none transition-all w-36 focus:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-ixlas-500 transition-colors"></i>
+                    <input type="text" name="q" placeholder="Məhsul axtar..." required class="pl-11 pr-4 py-2.5 bg-gray-100/80 border border-transparent rounded-full text-sm font-medium focus:border-ixlas-500 focus:bg-white focus:ring-2 focus:ring-ixlas-100 outline-none transition-all w-48 lg:focus:w-64">
                 </form>
 
-                <!-- Mobil cihazlar üçün yalnız ikon (kliklədikdə axtarış səhifəsinə atır) -->
-                <a href="search.php" class="sm:hidden w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
+                <!-- Mobil Axtarış İkonu -->
+                <a href="search.php" class="sm:hidden w-10 h-10 rounded-xl bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors border border-gray-100">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </a>
                 
-                <a href="<?= isset($_SESSION['user_id']) ? 'profile.php' : 'login.php' ?>" class="w-10 h-10 rounded-full hover:bg-ixlas-50 hover:text-ixlas-600 flex items-center justify-center text-gray-600 transition-colors">
-                    <i class="fa-regular fa-user"></i>
-                </a>
-                
-                <a href="cart.php" class="h-10 px-4 rounded-full bg-ixlas-50 text-ixlas-600 flex items-center justify-center gap-2 hover:bg-ixlas-100 transition-colors font-bold text-sm">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    Səbət
-                    <?php if($cart_count > 0): ?>
-                        <span class="bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white ml-1">
-                            <?= $cart_count ?>
-                        </span>
-                    <?php endif; ?>
-                </a>
+                <!-- Profil və Səbət (Yalnız Kompüterdə Görünür, Mobildə Menyuya Keçir) -->
+                <div class="hidden lg:flex items-center gap-3">
+                    <a href="<?= isset($_SESSION['user_id']) ? 'profile.php' : 'login.php' ?>" class="w-10 h-10 rounded-full hover:bg-ixlas-50 hover:text-ixlas-600 flex items-center justify-center text-gray-600 transition-colors" title="Şəxsi Kabinet">
+                        <i class="fa-regular fa-user text-lg"></i>
+                    </a>
+                    
+                    <a href="cart.php" class="h-10 px-5 rounded-full bg-ixlas-50 text-ixlas-700 flex items-center justify-center gap-2 hover:bg-ixlas-100 transition-colors font-bold text-sm border border-ixlas-100">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        Səbət
+                        <?php if($cart_count > 0): ?>
+                            <span class="bg-ixlas-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full ml-1 shadow-sm">
+                                <?= $cart_count ?>
+                            </span>
+                        <?php endif; ?>
+                    </a>
+                </div>
+
+                <!-- Kreativ Mobil Menyu İkonu (Hamburger) -->
+                <button id="mobile-menu-btn" class="lg:hidden w-10 h-10 rounded-xl bg-ixlas-50 flex items-center justify-center text-ixlas-600 border border-ixlas-100 menu-btn group focus:outline-none">
+                    <div class="flex flex-col justify-between w-[18px] h-[12px] menu-btn-lines">
+                        <div class="bg-current h-[2px] w-1/2 rounded-full self-end"></div>
+                        <div class="bg-current h-[2px] w-full rounded-full"></div>
+                        <div class="bg-current h-[2px] w-3/4 rounded-full self-start"></div>
+                    </div>
+                </button>
+
             </div>
         </div>
     </header>
+
+    <!-- Mobil Tətbiq Sayağı Slide-in Menyu -->
+    <div id="mobile-menu" class="fixed inset-0 z-50 pointer-events-none">
+        
+        <!-- Bulanıq Arxa Plan (Backdrop) -->
+        <div id="mobile-backdrop" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300 ease-in-out cursor-pointer"></div>
+        
+        <!-- Menyu Paneli -->
+        <div id="mobile-drawer" class="absolute top-0 right-0 bottom-0 w-[280px] sm:w-[320px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] rounded-l-3xl flex flex-col pointer-events-auto">
+            
+            <!-- Panel Başlığı və Bağlama Düyməsi -->
+            <div class="p-6 flex items-center justify-between border-b border-gray-100">
+                <span class="font-extrabold text-gray-900 text-lg">Menyu</span>
+                <button id="close-menu-btn" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Profil və Səbət Kartları (Mobil üçün Widget görünüşü) -->
+            <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+                <a href="<?= isset($_SESSION['user_id']) ? 'profile.php' : 'login.php' ?>" class="flex items-center gap-4 bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 mb-4 hover:border-ixlas-300 transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-ixlas-100 text-ixlas-600 flex items-center justify-center shrink-0">
+                        <i class="fa-regular fa-user text-lg"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-bold text-gray-900 truncate"><?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Hesaba Giriş' ?></p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider truncate"><?= isset($_SESSION['user_name']) ? 'Şəxsi Kabinet' : 'Qeydiyyatdan Keç' ?></p>
+                    </div>
+                </a>
+
+                <a href="cart.php" class="flex items-center justify-between bg-ixlas-600 text-white p-4 rounded-2xl shadow-lg shadow-ixlas-500/30 hover:bg-ixlas-700 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-cart-shopping text-lg"></i>
+                        <span class="font-bold text-sm">Səbətim</span>
+                    </div>
+                    <?php if($cart_count > 0): ?>
+                        <span class="bg-white text-ixlas-600 text-xs font-black px-2.5 py-0.5 rounded-full"><?= $cart_count ?></span>
+                    <?php endif; ?>
+                </a>
+            </div>
+
+            <!-- Menyu Linkləri (Kataloq) -->
+            <div class="p-6 flex-1 overflow-y-auto">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Kataloq</p>
+                <div class="flex flex-col space-y-1">
+                    <a href="index.php" class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-bold transition-colors group">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-house text-gray-300 group-hover:text-ixlas-500 w-4 text-center transition-colors"></i>
+                            Ana Səhifə
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-ixlas-500 transition-colors translate-x-0 group-hover:translate-x-1"></i>
+                    </a>
+                    
+                    <?php foreach($nav_categories as $cat): ?>
+                        <a href="category.php?id=<?= $cat['id'] ?>" class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-bold transition-colors group">
+                            <span class="flex items-center gap-3">
+                                <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> text-gray-300 group-hover:text-ixlas-500 w-4 text-center transition-colors"></i>
+                                <?= htmlspecialchars($cat['name']) ?>
+                            </span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-ixlas-500 transition-colors translate-x-0 group-hover:translate-x-1"></i>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <div class="p-6 bg-gray-50 text-center border-t border-gray-100">
+                <p class="text-[10px] text-gray-400 font-medium">&copy; <?= date('Y') ?> İxlas Telekom.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobil Menyu Üçün JavaScript (Animasiyalar və İdarə) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const closeBtn = document.getElementById('close-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            const backdrop = document.getElementById('mobile-backdrop');
+            const drawer = document.getElementById('mobile-drawer');
+
+            function openMenu() {
+                menu.classList.remove('pointer-events-none');
+                backdrop.classList.remove('opacity-0');
+                drawer.classList.remove('translate-x-full');
+                document.body.style.overflow = 'hidden'; // Arxada scroll-u kəsir
+            }
+
+            function closeMenu() {
+                backdrop.classList.add('opacity-0');
+                drawer.classList.add('translate-x-full');
+                document.body.style.overflow = ''; // Scroll-u qaytarır
+                setTimeout(() => {
+                    menu.classList.add('pointer-events-none');
+                }, 300); // Animasiya bitənə qədər gözləyir
+            }
+
+            menuBtn.addEventListener('click', openMenu);
+            closeBtn.addEventListener('click', closeMenu);
+            backdrop.addEventListener('click', closeMenu); // Qara ekrana basanda bağlansın
+        });
+    </script>
