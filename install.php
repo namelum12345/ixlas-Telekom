@@ -7,11 +7,11 @@ $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'install') {
     
-    // DB Məlumatları - Default olaraq 127.0.0.1 təyin edildi (Socket xətasına qarşı)
-    $db_host = $_POST['db_host'] ?? 'ixlastelecom';
+    // DB Məlumatları - Coolify parametrləri təyin edildi
+    $db_host = $_POST['db_host'] ?? 'mysql-database-qtz3exgtxznhvv8lwganliae';
     $db_user = $_POST['db_user'] ?? 'mysql';
     $db_pass = $_POST['db_pass'] ?? 'Polad.2006';
-    $db_name = $_POST['db_name'] ?? 'ixlas';
+    $db_name = $_POST['db_name'] ?? 'default';
     
     // Admin Məlumatları
     $admin_name = $_POST['admin_name'] ?? 'İxlas Telecom';
@@ -226,19 +226,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Host</label>
-                            <input type="text" name="db_host" value="127.0.0.1" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="text" name="db_host" value="mysql-database-qtz3exgtxznhvv8lwganliae" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Baza Adı</label>
-                            <input type="text" name="db_name" value="ixlas_telekom_db" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="text" name="db_name" value="default" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">İstifadəçi (User)</label>
-                            <input type="text" name="db_user" value="root" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="text" name="db_user" value="mysql" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Şifrə</label>
-                            <input type="password" name="db_pass" placeholder="Boş ola bilər (XAMPP)" class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="password" name="db_pass" value="Polad.2006" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                     </div>
 
@@ -250,15 +250,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Ad və Soyad</label>
-                            <input type="text" name="admin_name" value="Sistem Rəhbəri" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="text" name="admin_name" value="İxlas Telecom" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Mobil Nömrə (Giriş üçün)</label>
-                            <input type="text" name="admin_phone" placeholder="055-XXX-XX-XX" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="text" name="admin_phone" value="+994707546177" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Admin Şifrəsi</label>
-                            <input type="password" name="admin_pass" required minlength="6" placeholder="Min. 6 simvol" class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="password" name="admin_pass" value="qulu.nehremli" required minlength="6" class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                         
                         <div class="pt-4">
