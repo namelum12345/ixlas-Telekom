@@ -5,18 +5,22 @@ require_once '../config/auth_check.php';
 
 require_admin();
 
-// Ağıllı Yeniləmə: Əgər Products cədvəlində spesifikasiya sütunları yoxdursa, avtomatik yarat!
+// Ağıllı Yeniləmə: Spesifikasiya sütunlarını yoxlayır
 try {
     $pdo->exec("ALTER TABLE products ADD COLUMN ram VARCHAR(50) DEFAULT NULL");
     $pdo->exec("ALTER TABLE products ADD COLUMN storage VARCHAR(50) DEFAULT NULL");
     $pdo->exec("ALTER TABLE products ADD COLUMN processor VARCHAR(100) DEFAULT NULL");
     $pdo->exec("ALTER TABLE products ADD COLUMN camera VARCHAR(100) DEFAULT NULL");
-} catch (PDOException $e) {
-    // Sütunlar artıq mövcuddursa xətanı gözardı et.
-}
+} catch (PDOException $e) {}
 
 // ================= POST ƏMƏLİYYATLARI =================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    
+    // Şəkil yükləmə qovluğunu yoxla və yarat
+    $upload_dir = '../uploads/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+    }
     
     // YENİ MƏHSUL ƏLAVƏ ETMƏK
     if ($_POST['action'] === 'add') {
@@ -24,12 +28,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $category_id = (int)$_POST['category_id'];
         $price = (float)$_POST['price'];
         $stock = (int)$_POST['stock'];
-        $image_url = htmlspecialchars($_POST['image_url']);
         $description = htmlspecialchars($_POST['description']);
         $ram = htmlspecialchars($_POST['ram']);
         $storage = htmlspecialchars($_POST['storage']);
         $processor = htmlspecialchars($_POST['processor']);
         $camera = htmlspecialchars($_POST['camera']);
+        
+        $image_url = '📱'; // Default şəkil (Emoji)
+        
+        // Şəkil yüklənməsini yoxla
+        if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+            $file_ext = strtolower(pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION));
+            $file_name = uniqid() . '.' . $file_ext;
+            if (move_uploaded_file($_FILES['image_file']['tmp_name'], $upload_dir . $file_name)) {
+                $image_url = 'uploads/' . $file_name;
+            }
+        }
         
         $stmt = $pdo->prepare("INSERT INTO products (name, category_id, price, stock, image_url, description, ram, storage, processor, camera, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)");
         $stmt->execute([$name, $category_id, $price, $stock, $image_url, $description, $ram, $storage, $processor, $camera]);
@@ -44,12 +58,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $category_id = (int)$_POST['category_id'];
         $price = (float)$_POST['price'];
         $stock = (int)$_POST['stock'];
-        $image_url = htmlspecialchars($_POST['image_url']);
         $description = htmlspecialchars($_POST['description']);
         $ram = htmlspecialchars($_POST['ram']);
         $storage = htmlspecialchars($_POST['storage']);
         $processor = htmlspecialchars($_POST['processor']);
         $camera = htmlspecialchars($_POST['camera']);
+        
+        $image_url = $_POST['existing_image'] ?? '📱';
+        
+        // YENİ şəkil yüklənibsə onu əvəz et
+        if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+            $file_ext = strtolower(pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION));
+            $file_name = uniqid() . '.' . $file_ext;
+            if (move_uploaded_file($_FILES['image_file']['tmp_name'], $upload_dir . $file_name)) {
+                $image_url = 'uploads/' . $file_name;
+            }
+        }
         
         $stmt = $pdo->prepare("UPDATE products SET name=?, category_id=?, price=?, stock=?, image_url=?, description=?, ram=?, storage=?, processor=?, camera=? WHERE id=?");
         $stmt->execute([$name, $category_id, $price, $stock, $image_url, $description, $ram, $storage, $processor, $camera, $id]);
@@ -80,7 +104,7 @@ $params = [];
 if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
     $search = trim($_GET['search']);
     $search_query = " WHERE p.name LIKE ? ";
-    $params[] = "%$search%"; // Sonda və əvvəldə hərflərə görə tapır
+    $params[] = "%$search%";
 }
 
 // Məhsulları Çəkmək (Axtarışa görə filtrlənir)
@@ -101,30 +125,10 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
         tailwind.config = { theme: { extend: { colors: { ixlas: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 900: '#14532d' } } } } }
     </script>
 </head>
-<body class="bg-gray-50 flex h-screen overflow-hidden">
+<body class="bg-gray-50 flex h-screen overflow-hidden text-gray-800">
     
-    <aside class="w-64 bg-ixlas-900 text-white flex flex-col hidden md:flex">
-        <div class="h-16 flex items-center px-6 border-b border-ixlas-700">
-            <span class="text-xl font-bold text-white"><i class="fa-solid fa-signal text-ixlas-400 mr-2"></i>İxlas Admin</span>
-        </div>
-        <nav class="flex-1 p-4 space-y-2">
-            <a href="index.php" class="flex items-center gap-3 px-4 py-3 text-ixlas-100 hover:bg-ixlas-800 rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Ümumi Panel
-            </a>
-            <a href="orders.php" class="flex items-center gap-3 px-4 py-3 text-ixlas-100 hover:bg-ixlas-800 rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-cart-shopping w-5 text-center"></i> Sifarişlər
-            </a>
-            <a href="categories.php" class="flex items-center gap-3 px-4 py-3 text-ixlas-100 hover:bg-ixlas-800 rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-layer-group w-5 text-center"></i> Kateqoriyalar
-            </a>
-            <a href="products.php" class="flex items-center gap-3 px-4 py-3 bg-ixlas-700 text-white rounded-xl font-bold transition-colors">
-                <i class="fa-solid fa-box-open w-5 text-center"></i> Məhsullar
-            </a>
-            <a href="users.php" class="flex items-center gap-3 px-4 py-3 text-ixlas-100 hover:bg-ixlas-800 rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-users w-5 text-center"></i> İstifadəçilər
-            </a>
-        </nav>
-    </aside>
+    <!-- Dinamik Sidebar -->
+    <?php include '../includes/admin_sidebar.php'; ?>
 
     <main class="flex-1 flex flex-col h-screen overflow-y-auto">
         <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-0 sticky top-0">
@@ -139,7 +143,6 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
                 </div>
                 
                 <div class="flex items-center gap-4">
-                    <!-- Axtarış Formu -->
                     <form method="GET" class="relative">
                         <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Məhsul adı axtar..." class="pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:border-ixlas-500 focus:ring-2 focus:ring-ixlas-100 outline-none transition-all w-64 shadow-sm">
                         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -161,7 +164,7 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
                             <tr>
                                 <th class="px-6 py-4">Şəkil</th>
                                 <th class="px-6 py-4">Məhsul Adı</th>
-                                <th class="px-6 py-4">Texniki Detallar (Müqayisə)</th>
+                                <th class="px-6 py-4">Texniki Detallar</th>
                                 <th class="px-6 py-4">Qiymət</th>
                                 <th class="px-6 py-4">Stok / Status</th>
                                 <th class="px-6 py-4 text-right">İdarə</th>
@@ -170,14 +173,22 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
                         <tbody class="divide-y divide-gray-100">
                             <?php foreach($products as $prod): ?>
                                 <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 text-3xl"><?= htmlspecialchars($prod['image_url']) ?></td>
+                                    <td class="px-6 py-4">
+                                        <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden">
+                                            <?php if(strpos($prod['image_url'], 'uploads/') !== false || filter_var($prod['image_url'], FILTER_VALIDATE_URL)): ?>
+                                                <img src="../<?= htmlspecialchars($prod['image_url']) ?>" class="w-full h-full object-cover">
+                                            <?php else: ?>
+                                                <span class="text-2xl"><?= htmlspecialchars($prod['image_url']) ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
                                     <td class="px-6 py-4">
                                         <p class="font-bold text-gray-900"><?= htmlspecialchars($prod['name']) ?></p>
                                         <p class="text-xs text-gray-500 mt-0.5"><?= htmlspecialchars($prod['category_name']) ?></p>
                                     </td>
                                     <td class="px-6 py-4 text-xs text-gray-500 space-y-1">
-                                        <?php if($prod['ram']): ?><p><span class="font-bold">RAM:</span> <?= htmlspecialchars($prod['ram']) ?></p><?php endif; ?>
-                                        <?php if($prod['storage']): ?><p><span class="font-bold">Yaddaş:</span> <?= htmlspecialchars($prod['storage']) ?></p><?php endif; ?>
+                                        <?php if($prod['ram']): ?><p><span class="font-bold text-gray-700">RAM:</span> <?= htmlspecialchars($prod['ram']) ?></p><?php endif; ?>
+                                        <?php if($prod['storage']): ?><p><span class="font-bold text-gray-700">Yaddaş:</span> <?= htmlspecialchars($prod['storage']) ?></p><?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 font-extrabold text-ixlas-700"><?= number_format($prod['price'], 2) ?> ₼</td>
                                     <td class="px-6 py-4">
@@ -197,7 +208,6 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <!-- Redaktə Düyməsi (HTML5 dataset ilə) -->
                                             <button type="button" 
                                                 onclick="openEditModal(this)"
                                                 data-id="<?= $prod['id'] ?>"
@@ -252,6 +262,57 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
             
             <div class="overflow-y-auto p-6 flex-1">
                 <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <!-- BURADA XƏTA VAR İDİ, DÜZƏLTDİM: value="add" -->
+                    <input type="hidden" name="action" value="add">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b border-gray-100 pb-2">Ümumi Məlumat</h4>
+                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Məhsulun Adı</label><input type="text" name="name" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Kateqoriya</label>
+                                <select name="category_id" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none bg-white">
+                                    <?php foreach($categories as $cat): ?><option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option><?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block text-xs font-bold text-gray-700 mb-1">Qiymət (₼)</label><input type="number" step="0.01" name="price" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
+                                <div><label class="block text-xs font-bold text-gray-700 mb-1">Stok (Say)</label><input type="number" name="stock" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Cihazdan Şəkil Seçin</label>
+                                <input type="file" name="image_file" accept="image/*" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none bg-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer transition-all">
+                            </div>
+                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Qısa Təsvir</label><textarea name="description" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none resize-none"></textarea></div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b border-gray-100 pb-2">Texniki Spesifikasiyalar</h4>
+                            <div><label class="block text-xs font-bold text-gray-700 mb-1">RAM (məs: 8 GB)</label><input type="text" name="ram" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
+                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Daxili Yaddaş (məs: 256 GB)</label><input type="text" name="storage" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
+                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Prosessor (CPU)</label><input type="text" name="processor" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
+                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Kamera (məs: 50MP + 12MP)</label><input type="text" name="camera" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-gray-100 mt-6 flex justify-end">
+                        <button type="submit" class="px-8 py-3.5 bg-ixlas-600 text-white font-bold rounded-xl shadow-lg shadow-ixlas-600/30 hover:bg-ixlas-700 transition-colors">Məhsulu Kataloqa Əlavə Et</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- REDAKTƏ ET MODALI -->
+    <div id="edit-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50/30">
+                <h3 class="font-bold text-gray-900 text-lg">Məhsulu Redaktə Et</h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-900"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="overflow-y-auto p-6 flex-1">
+                <form method="POST" enctype="multipart/form-data" class="space-y-6">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="product_id" id="edit_product_id" value="">
                     <input type="hidden" name="existing_image" id="edit_existing_image" value="">
@@ -271,9 +332,8 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
                                 <div><label class="block text-xs font-bold text-gray-700 mb-1">Stok (Say)</label><input type="number" name="stock" id="edit_stock" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Yeni Şəkil Seçin (İstəyə bağlı)</label>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Yeni Şəkil Seçin (Dəyişməsəniz əvvəlki qalacaq)</label>
                                 <input type="file" name="image_file" accept="image/*" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none bg-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer transition-all">
-                                <p class="text-[10px] text-gray-400 mt-1">Yeni şəkil seçməsəniz, məhsulun əvvəlki şəkli qalacaq.</p>
                             </div>
                             <div><label class="block text-xs font-bold text-gray-700 mb-1">Qısa Təsvir</label><textarea name="description" id="edit_description" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none resize-none"></textarea></div>
                         </div>
@@ -297,7 +357,6 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
     </div>
 
     <script>
-        // Məhsul məlumatlarını dataset-dən çəkib modala doldurur
         function openEditModal(btn) {
             const ds = btn.dataset;
             document.getElementById('edit_product_id').value = ds.id;
@@ -306,7 +365,6 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
             document.getElementById('edit_category_id').value = ds.cat;
             document.getElementById('edit_price').value = ds.price;
             document.getElementById('edit_stock').value = ds.stock;
-            document.getElementById('edit_image_url').value = ds.img;
             document.getElementById('edit_description').value = ds.desc;
             document.getElementById('edit_ram').value = ds.ram;
             document.getElementById('edit_storage').value = ds.storage;

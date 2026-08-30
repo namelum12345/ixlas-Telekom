@@ -7,8 +7,28 @@ if (!file_exists($db_file)) {
 }
 require_once $db_file;
 
-// Ana kateqoriyaları bazadan çəkirik
-$nav_categories = $pdo->query("SELECT * FROM categories WHERE parent_id IS NULL LIMIT 5")->fetchAll();
+// Bütün kateqoriyaları çəkib Ana və Alt kateqoriyalara ayırırıq
+$all_categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
+$main_cats = [];
+$sub_cats = [];
+
+foreach($all_categories as $c) {
+    if(empty($c['parent_id'])) {
+        $main_cats[$c['id']] = $c;
+        $main_cats[$c['id']]['children'] = [];
+    } else {
+        $sub_cats[] = $c;
+    }
+}
+
+foreach($sub_cats as $sub) {
+    if(isset($main_cats[$sub['parent_id']])) {
+        $main_cats[$sub['parent_id']]['children'][] = $sub;
+    }
+}
+
+// Menyuda göstərmək üçün ilk 6 ana kateqoriyanı seçirik
+$nav_categories = array_slice($main_cats, 0, 6);
 
 // Səbətdəki məhsul sayını hesablamaq
 $cart_count = 0;
@@ -31,21 +51,9 @@ if(isset($_SESSION['cart'])) {
             theme: { 
                 extend: { 
                     colors: { 
-                        ixlas: { 
-                            50: '#f0fdf4', 
-                            100: '#dcfce7', 
-                            200: '#bbf7d0', 
-                            400: '#4ade80', 
-                            500: '#22c55e', 
-                            600: '#16a34a', 
-                            700: '#15803d', 
-                            800: '#166534', 
-                            900: '#14532d' 
-                        } 
+                        ixlas: { 50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d' } 
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 } 
             } 
         }
@@ -61,6 +69,10 @@ if(isset($_SESSION['cart'])) {
         /* Hamburger Animasiyası üçün */
         .menu-btn-lines div { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .menu-btn:hover .menu-btn-lines div { width: 100%; }
+        
+        /* Dropdown Animasiyası */
+        .dropdown-menu { opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease; }
+        .group:hover .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
     </style>
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
@@ -80,19 +92,37 @@ if(isset($_SESSION['cart'])) {
                 </div>
             </a>
 
-            <!-- Navigation (Yalnız Kompüterdə Görünür) -->
-            <nav class="hidden lg:flex items-center gap-8">
+            <!-- Navigation (Kompüter üçün Dropdown ilə) -->
+            <nav class="hidden lg:flex items-center gap-8 h-full">
                 <a href="index.php" class="text-sm font-bold text-gray-900 hover:text-ixlas-600 transition-colors">Ana Səhifə</a>
+                
                 <?php foreach($nav_categories as $cat): ?>
-                    <a href="category.php?id=<?= $cat['id'] ?>" class="text-sm font-bold text-gray-600 hover:text-ixlas-600 transition-colors">
-                        <?= htmlspecialchars($cat['name']) ?>
-                    </a>
+                    <?php if(empty($cat['children'])): ?>
+                        <a href="category.php?id=<?= $cat['id'] ?>" class="text-sm font-bold text-gray-600 hover:text-ixlas-600 transition-colors">
+                            <?= htmlspecialchars($cat['name']) ?>
+                        </a>
+                    <?php else: ?>
+                        <div class="relative group h-full flex items-center">
+                            <a href="category.php?id=<?= $cat['id'] ?>" class="text-sm font-bold text-gray-600 hover:text-ixlas-600 transition-colors flex items-center gap-1.5 cursor-pointer">
+                                <?= htmlspecialchars($cat['name']) ?>
+                                <i class="fa-solid fa-chevron-down text-[10px] opacity-70"></i>
+                            </a>
+                            
+                            <!-- Dropdown Pəncərəsi -->
+                            <div class="dropdown-menu absolute top-[70px] left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-xl border border-gray-100 w-56 p-2 z-50">
+                                <?php foreach($cat['children'] as $child): ?>
+                                    <a href="category.php?id=<?= $child['id'] ?>" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-ixlas-50 hover:text-ixlas-600 rounded-xl transition-colors">
+                                        <?= htmlspecialchars($child['name']) ?>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </nav>
 
             <div class="flex items-center gap-2 md:gap-4 z-50">
-                
-                <!-- Axtarış Formu (Kompüter üçün input, Mobil üçün yalnız İkon) -->
+                <!-- Axtarış Formu -->
                 <form action="search.php" method="GET" class="relative hidden sm:block group">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-ixlas-500 transition-colors"></i>
                     <input type="text" name="q" placeholder="Məhsul axtar..." required class="pl-11 pr-4 py-2.5 bg-gray-100/80 border border-transparent rounded-full text-sm font-medium focus:border-ixlas-500 focus:bg-white focus:ring-2 focus:ring-ixlas-100 outline-none transition-all w-48 lg:focus:w-64">
@@ -103,7 +133,7 @@ if(isset($_SESSION['cart'])) {
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </a>
                 
-                <!-- Profil və Səbət (Yalnız Kompüterdə Görünür, Mobildə Menyuya Keçir) -->
+                <!-- Profil və Səbət -->
                 <div class="hidden lg:flex items-center gap-3">
                     <a href="<?= isset($_SESSION['user_id']) ? 'profile.php' : 'login.php' ?>" class="w-10 h-10 rounded-full hover:bg-ixlas-50 hover:text-ixlas-600 flex items-center justify-center text-gray-600 transition-colors" title="Şəxsi Kabinet">
                         <i class="fa-regular fa-user text-lg"></i>
@@ -120,7 +150,7 @@ if(isset($_SESSION['cart'])) {
                     </a>
                 </div>
 
-                <!-- Kreativ Mobil Menyu İkonu (Hamburger) -->
+                <!-- Kreativ Mobil Menyu İkonu -->
                 <button id="mobile-menu-btn" class="lg:hidden w-10 h-10 rounded-xl bg-ixlas-50 flex items-center justify-center text-ixlas-600 border border-ixlas-100 menu-btn group focus:outline-none">
                     <div class="flex flex-col justify-between w-[18px] h-[12px] menu-btn-lines">
                         <div class="bg-current h-[2px] w-1/2 rounded-full self-end"></div>
@@ -128,21 +158,18 @@ if(isset($_SESSION['cart'])) {
                         <div class="bg-current h-[2px] w-3/4 rounded-full self-start"></div>
                     </div>
                 </button>
-
             </div>
         </div>
     </header>
 
     <!-- Mobil Tətbiq Sayağı Slide-in Menyu -->
     <div id="mobile-menu" class="fixed inset-0 z-50 pointer-events-none">
-        
-        <!-- Bulanıq Arxa Plan (Backdrop) -->
+        <!-- Bulanıq Arxa Plan -->
         <div id="mobile-backdrop" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300 ease-in-out cursor-pointer"></div>
         
         <!-- Menyu Paneli -->
         <div id="mobile-drawer" class="absolute top-0 right-0 bottom-0 w-[280px] sm:w-[320px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] rounded-l-3xl flex flex-col pointer-events-auto">
             
-            <!-- Panel Başlığı və Bağlama Düyməsi -->
             <div class="p-6 flex items-center justify-between border-b border-gray-100">
                 <span class="font-extrabold text-gray-900 text-lg">Menyu</span>
                 <button id="close-menu-btn" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
@@ -150,7 +177,6 @@ if(isset($_SESSION['cart'])) {
                 </button>
             </div>
 
-            <!-- Profil və Səbət Kartları (Mobil üçün Widget görünüşü) -->
             <div class="p-6 border-b border-gray-100 bg-gray-50/50">
                 <a href="<?= isset($_SESSION['user_id']) ? 'profile.php' : 'login.php' ?>" class="flex items-center gap-4 bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 mb-4 hover:border-ixlas-300 transition-colors">
                     <div class="w-10 h-10 rounded-full bg-ixlas-100 text-ixlas-600 flex items-center justify-center shrink-0">
@@ -173,27 +199,49 @@ if(isset($_SESSION['cart'])) {
                 </a>
             </div>
 
-            <!-- Menyu Linkləri (Kataloq) -->
+            <!-- Mobil Akkordeon Menyular -->
             <div class="p-6 flex-1 overflow-y-auto">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Kataloq</p>
                 <div class="flex flex-col space-y-1">
-                    <a href="index.php" class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-bold transition-colors group">
+                    
+                    <a href="index.php" class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-bold transition-colors">
                         <span class="flex items-center gap-3">
-                            <i class="fa-solid fa-house text-gray-300 group-hover:text-ixlas-500 w-4 text-center transition-colors"></i>
-                            Ana Səhifə
+                            <i class="fa-solid fa-house text-gray-300 w-4 text-center"></i> Ana Səhifə
                         </span>
-                        <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-ixlas-500 transition-colors translate-x-0 group-hover:translate-x-1"></i>
                     </a>
                     
                     <?php foreach($nav_categories as $cat): ?>
-                        <a href="category.php?id=<?= $cat['id'] ?>" class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-bold transition-colors group">
-                            <span class="flex items-center gap-3">
-                                <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> text-gray-300 group-hover:text-ixlas-500 w-4 text-center transition-colors"></i>
-                                <?= htmlspecialchars($cat['name']) ?>
-                            </span>
-                            <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 group-hover:text-ixlas-500 transition-colors translate-x-0 group-hover:translate-x-1"></i>
-                        </a>
+                        <?php if(empty($cat['children'])): ?>
+                            <a href="category.php?id=<?= $cat['id'] ?>" class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-bold transition-colors">
+                                <span class="flex items-center gap-3">
+                                    <i class="fa-solid <?= htmlspecialchars($cat['icon'] ?: 'fa-folder') ?> text-gray-300 w-4 text-center"></i>
+                                    <?= htmlspecialchars($cat['name']) ?>
+                                </span>
+                            </a>
+                        <?php else: ?>
+                            <!-- Alt Kateqoriyası olanlar üçün Akkordeon -->
+                            <div>
+                                <button onclick="toggleMobileSubmenu('sub-<?= $cat['id'] ?>', 'icon-<?= $cat['id'] ?>')" class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-bold transition-colors">
+                                    <span class="flex items-center gap-3">
+                                        <i class="fa-solid <?= htmlspecialchars($cat['icon'] ?: 'fa-folder') ?> text-gray-300 w-4 text-center"></i>
+                                        <?= htmlspecialchars($cat['name']) ?>
+                                    </span>
+                                    <i id="icon-<?= $cat['id'] ?>" class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform duration-300"></i>
+                                </button>
+                                
+                                <!-- Alt Kateqoriyaların siyahısı -->
+                                <div id="sub-<?= $cat['id'] ?>" class="hidden pl-10 pr-3 py-1 space-y-1 bg-gray-50/50 rounded-xl mt-1">
+                                    <a href="category.php?id=<?= $cat['id'] ?>" class="block py-2 text-sm font-bold text-ixlas-600">Bütün <?= htmlspecialchars($cat['name']) ?></a>
+                                    <?php foreach($cat['children'] as $child): ?>
+                                        <a href="category.php?id=<?= $child['id'] ?>" class="block py-2 text-sm font-medium text-gray-600 hover:text-ixlas-600 transition-colors">
+                                            <?= htmlspecialchars($child['name']) ?>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     <?php endforeach; ?>
+
                 </div>
             </div>
             
@@ -203,7 +251,7 @@ if(isset($_SESSION['cart'])) {
         </div>
     </div>
 
-    <!-- Mobil Menyu Üçün JavaScript (Animasiyalar və İdarə) -->
+    <!-- Mobil Menyu Üçün JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const menuBtn = document.getElementById('mobile-menu-btn');
@@ -216,20 +264,32 @@ if(isset($_SESSION['cart'])) {
                 menu.classList.remove('pointer-events-none');
                 backdrop.classList.remove('opacity-0');
                 drawer.classList.remove('translate-x-full');
-                document.body.style.overflow = 'hidden'; // Arxada scroll-u kəsir
+                document.body.style.overflow = 'hidden'; 
             }
 
             function closeMenu() {
                 backdrop.classList.add('opacity-0');
                 drawer.classList.add('translate-x-full');
-                document.body.style.overflow = ''; // Scroll-u qaytarır
-                setTimeout(() => {
-                    menu.classList.add('pointer-events-none');
-                }, 300); // Animasiya bitənə qədər gözləyir
+                document.body.style.overflow = ''; 
+                setTimeout(() => { menu.classList.add('pointer-events-none'); }, 300);
             }
 
             menuBtn.addEventListener('click', openMenu);
             closeBtn.addEventListener('click', closeMenu);
-            backdrop.addEventListener('click', closeMenu); // Qara ekrana basanda bağlansın
+            backdrop.addEventListener('click', closeMenu);
         });
+
+        // Akkordeon funksiyası
+        function toggleMobileSubmenu(submenuId, iconId) {
+            const submenu = document.getElementById(submenuId);
+            const icon = document.getElementById(iconId);
+            
+            if (submenu.classList.contains('hidden')) {
+                submenu.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                submenu.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
     </script>
