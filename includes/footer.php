@@ -49,32 +49,33 @@ try {
 } catch(PDOException $e) {}
 ?>
     <footer class="bg-ixlas-900 text-ixlas-100 mt-auto border-t-[8px] border-ixlas-600">
-        <div class="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
+        <!-- Mobil üçün xüsusi boşluq və Grid nizamlamaları əlavə edildi -->
+        <div class="max-w-7xl mx-auto px-4 py-10 lg:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
             
-            <!-- Loqo və Təsvir -->
-            <div class="md:col-span-1">
-                <a href="index.php" class="flex items-center gap-3 mb-6 group">
+            <!-- Loqo və Təsvir (Planşetdə tam en tutacaq) -->
+            <div class="sm:col-span-2 lg:col-span-1 mb-4 sm:mb-0 text-center sm:text-left">
+                <a href="index.php" class="flex items-center justify-center sm:justify-start gap-3 mb-6 group">
                     <div class="w-10 h-10 bg-white text-ixlas-600 rounded-xl flex items-center justify-center text-xl shadow-lg">
                         <i class="fa-solid fa-signal"></i>
                     </div>
                     <span class="text-2xl font-extrabold text-white tracking-tight">İxlas Telekom</span>
                 </a>
-                <p class="text-sm text-ixlas-200 mb-6 leading-relaxed">
+                <p class="text-sm text-ixlas-200 mb-6 leading-relaxed max-w-sm mx-auto sm:mx-0">
                     <?= htmlspecialchars($settings['site_desc'] ?? 'Ən son texnologiyalar xidmətinizdədir.') ?>
                 </p>
-                <div class="flex gap-4">
+                <div class="flex gap-4 justify-center sm:justify-start">
                     <a href="<?= htmlspecialchars($settings['social_ig'] ?? '#') ?>" target="_blank" class="w-10 h-10 rounded-full bg-ixlas-800 flex items-center justify-center hover:bg-ixlas-500 hover:text-white transition-all hover:-translate-y-1"><i class="fa-brands fa-instagram text-lg"></i></a>
                     <a href="<?= htmlspecialchars($settings['social_fb'] ?? '#') ?>" target="_blank" class="w-10 h-10 rounded-full bg-ixlas-800 flex items-center justify-center hover:bg-ixlas-500 hover:text-white transition-all hover:-translate-y-1"><i class="fa-brands fa-facebook-f text-lg"></i></a>
                     <a href="<?= htmlspecialchars($settings['social_wa'] ?? '#') ?>" target="_blank" class="w-10 h-10 rounded-full bg-ixlas-800 flex items-center justify-center hover:bg-ixlas-500 hover:text-white transition-all hover:-translate-y-1"><i class="fa-brands fa-whatsapp text-lg"></i></a>
                 </div>
             </div>
             
-            <!-- Dinamik Məlumat Linkləri (Cədvəldən Gəlir) -->
-            <div>
-                <h3 class="font-bold text-white mb-6 text-lg">Məlumat</h3>
-                <ul class="space-y-3 text-sm">
+            <!-- Dinamik Məlumat Linkləri -->
+            <div class="text-center sm:text-left">
+                <h3 class="font-bold text-white mb-5 sm:mb-6 text-lg">Məlumat</h3>
+                <ul class="space-y-3 text-sm flex flex-col items-center sm:items-start">
                     <?php if(!empty($footer_pages)): foreach($footer_pages as $fp): ?>
-                        <li><a href="page.php?p=<?= htmlspecialchars($fp['slug']) ?>" class="text-ixlas-200 hover:text-white transition-colors flex items-center gap-2 group"><i class="fa-solid fa-angle-right text-xs text-ixlas-500 group-hover:translate-x-1 transition-transform"></i> <?= htmlspecialchars($fp['title']) ?></a></li>
+                        <li><a href="page.php?p=<?= htmlspecialchars($fp['slug']) ?>" class="text-ixlas-200 hover:text-white transition-colors flex items-center gap-2 group"><i class="fa-solid fa-angle-right text-xs text-ixlas-500 group-hover:translate-x-1 transition-transform hidden sm:inline-block"></i> <?= htmlspecialchars($fp['title']) ?></a></li>
                     <?php endforeach; else: ?>
                         <li class="text-ixlas-400">Səhifə yoxdur</li>
                     <?php endif; ?>
@@ -82,42 +83,42 @@ try {
             </div>
             
             <!-- Müştəri Xidmətləri Linkləri -->
-            <div>
-                <h3 class="font-bold text-white mb-6 text-lg">Müştəri Xidmətləri</h3>
-                <ul class="space-y-3 text-sm">
-                    <li><a href="profile.php" class="text-ixlas-200 hover:text-white transition-colors flex items-center gap-2 group"><i class="fa-solid fa-angle-right text-xs text-ixlas-500 group-hover:translate-x-1 transition-transform"></i> Şəxsi Kabinet</a></li>
-                    <li><a href="cart.php" class="text-ixlas-200 hover:text-white transition-colors flex items-center gap-2 group"><i class="fa-solid fa-angle-right text-xs text-ixlas-500 group-hover:translate-x-1 transition-transform"></i> Səbətim</a></li>
-                    <li><a href="profile.php?tab=orders" class="text-ixlas-200 hover:text-white transition-colors flex items-center gap-2 group"><i class="fa-solid fa-angle-right text-xs text-ixlas-500 group-hover:translate-x-1 transition-transform"></i> Sifarişlərin izlənməsi</a></li>
+            <div class="text-center sm:text-left">
+                <h3 class="font-bold text-white mb-5 sm:mb-6 text-lg">Müştəri Xidmətləri</h3>
+                <ul class="space-y-3 text-sm flex flex-col items-center sm:items-start">
+                    <li><a href="profile.php" class="text-ixlas-200 hover:text-white transition-colors flex items-center gap-2 group"><i class="fa-solid fa-angle-right text-xs text-ixlas-500 group-hover:translate-x-1 transition-transform hidden sm:inline-block"></i> Şəxsi Kabinet</a></li>
+                    <li><a href="cart.php" class="text-ixlas-200 hover:text-white transition-colors flex items-center gap-2 group"><i class="fa-solid fa-angle-right text-xs text-ixlas-500 group-hover:translate-x-1 transition-transform hidden sm:inline-block"></i> Səbətim</a></li>
+                    <li><a href="profile.php?tab=orders" class="text-ixlas-200 hover:text-white transition-colors flex items-center gap-2 group"><i class="fa-solid fa-angle-right text-xs text-ixlas-500 group-hover:translate-x-1 transition-transform hidden sm:inline-block"></i> Sifarişlərin izlənməsi</a></li>
                 </ul>
             </div>
             
-            <!-- Dinamik Əlaqə Məlumatları -->
-            <div>
-                <h3 class="font-bold text-white mb-6 text-lg">Bizimlə Əlaqə</h3>
-                <ul class="space-y-4 text-sm">
-                    <li class="flex items-start gap-4">
+            <!-- Dinamik Əlaqə Məlumatları (Planşetdə tam en tutacaq) -->
+            <div class="sm:col-span-2 lg:col-span-1 mt-4 sm:mt-0">
+                <h3 class="font-bold text-white mb-5 sm:mb-6 text-lg text-center sm:text-left">Bizimlə Əlaqə</h3>
+                <ul class="space-y-4 text-sm max-w-sm mx-auto sm:mx-0">
+                    <li class="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 text-center sm:text-left">
                         <div class="w-8 h-8 rounded-full bg-ixlas-800 flex items-center justify-center text-ixlas-400 shrink-0"><i class="fa-solid fa-location-dot"></i></div>
-                        <span class="text-ixlas-200 pt-1"><?= htmlspecialchars($settings['contact_address'] ?? '') ?></span>
+                        <span class="text-ixlas-200 sm:pt-1"><?= htmlspecialchars($settings['contact_address'] ?? '') ?></span>
                     </li>
-                    <li class="flex items-center gap-4">
+                    <li class="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 text-center sm:text-left">
                         <div class="w-8 h-8 rounded-full bg-ixlas-800 flex items-center justify-center text-ixlas-400 shrink-0"><i class="fa-solid fa-phone"></i></div>
-                        <span class="text-ixlas-200"><?= htmlspecialchars($settings['contact_phone'] ?? '') ?></span>
+                        <span class="text-ixlas-200 sm:pt-1"><?= htmlspecialchars($settings['contact_phone'] ?? '') ?></span>
                     </li>
-                    <li class="flex items-center gap-4">
+                    <li class="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 text-center sm:text-left">
                         <div class="w-8 h-8 rounded-full bg-ixlas-800 flex items-center justify-center text-ixlas-400 shrink-0"><i class="fa-solid fa-envelope"></i></div>
-                        <span class="text-ixlas-200"><?= htmlspecialchars($settings['contact_email'] ?? '') ?></span>
+                        <span class="text-ixlas-200 sm:pt-1"><?= htmlspecialchars($settings['contact_email'] ?? '') ?></span>
                     </li>
                 </ul>
             </div>
         </div>
         
         <!-- Müəllif Hüquqları -->
-        <div class="border-t border-ixlas-800 mt-4">
-            <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center text-xs text-ixlas-400 gap-4">
+        <div class="border-t border-ixlas-800">
+            <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center text-xs text-ixlas-400 gap-4 text-center md:text-left">
                 <p>&copy; <?= date('Y') ?> İxlas Telekom. Bütün hüquqlar qorunur.</p>
-                <div class="flex gap-2 text-ixlas-500">
-                    <i class="fa-brands fa-cc-visa text-2xl opacity-70 hover:opacity-100 transition-opacity"></i>
-                    <i class="fa-brands fa-cc-mastercard text-2xl opacity-70 hover:opacity-100 transition-opacity"></i>
+                <div class="flex gap-3 text-ixlas-500">
+                    <i class="fa-brands fa-cc-visa text-3xl opacity-70 hover:opacity-100 transition-opacity"></i>
+                    <i class="fa-brands fa-cc-mastercard text-3xl opacity-70 hover:opacity-100 transition-opacity"></i>
                 </div>
             </div>
         </div>
