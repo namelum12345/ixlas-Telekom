@@ -1,13 +1,11 @@
 <?php
 require_once 'config/db.php';
 
-// Təhlükəsizlik: Yalnız daxil olmuş istifadəçilər bura girə bilər
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-// Əgər admin və ya başqa roldursa, öz panelinə göndərək
 if ($_SESSION['user_role'] === 'superadmin' || $_SESSION['user_role'] === 'admin') {
     header("Location: admin/index.php");
     exit;
@@ -19,41 +17,33 @@ if ($_SESSION['user_role'] === 'superadmin' || $_SESSION['user_role'] === 'admin
 $user_id = (int)$_SESSION['user_id'];
 $msg = '';
 
-// ŞƏXSİ MƏLUMATLARI YENİLƏMƏK (POST Sorğusu)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $new_name = trim(htmlspecialchars($_POST['name']));
     $new_password = $_POST['new_password'];
     
     if (!empty($new_password)) {
-        // Həm ad, həm də şifrə dəyişir
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
         $update_stmt = $pdo->prepare("UPDATE users SET name = ?, password = ? WHERE id = ?");
         $update_stmt->execute([$new_name, $hashed_password, $user_id]);
     } else {
-        // Yalnız ad dəyişir
         $update_stmt = $pdo->prepare("UPDATE users SET name = ? WHERE id = ?");
         $update_stmt->execute([$new_name, $user_id]);
     }
     
-    // Sessiyanı yeniləyirik ki, yuxarıdakı menyuda da ad dərhal dəyişsin
     $_SESSION['user_name'] = $new_name;
     $msg = 'success';
 }
 
-// İstifadəçi məlumatlarını çəkirik
 $user_stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $user_stmt->execute([$user_id]);
 $user = $user_stmt->fetch();
 
-// Sifarişləri çəkirik
 $orders_stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
 $orders_stmt->execute([$user_id]);
 $orders = $orders_stmt->fetchAll();
 
-// Aktiv Tab-ı təyin edirik (Sayılan olaraq 'orders')
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'orders';
 
-// Sidebar üçün aktiv və passiv klasslar
 $tab_active_class = "flex items-center gap-3 px-4 py-3 bg-ixlas-50 text-ixlas-600 rounded-xl font-bold transition-colors";
 $tab_inactive_class = "flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition-colors";
 
@@ -63,18 +53,15 @@ require_once 'includes/header.php';
 <main class="flex-1 bg-gray-50/50 py-10 lg:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Ümumi Başlıq (Mobil üçün) -->
         <div class="md:hidden mb-6">
             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Şəxsi Kabinet</h1>
         </div>
 
         <div class="flex flex-col md:flex-row gap-8">
             
-            <!-- SIDEBAR -->
             <div class="w-full md:w-64 lg:w-72 shrink-0">
                 <div class="bg-white rounded-3xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden sticky top-28">
                     
-                    <!-- Profil Qısa Məlumat -->
                     <div class="p-6 border-b border-gray-100 text-center relative overflow-hidden">
                         <div class="absolute -top-12 -right-12 w-32 h-32 bg-ixlas-50 rounded-full mix-blend-multiply opacity-50"></div>
                         <div class="w-20 h-20 bg-ixlas-100 text-ixlas-600 rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-4 shadow-inner relative z-10">
@@ -84,7 +71,6 @@ require_once 'includes/header.php';
                         <p class="text-gray-500 text-sm relative z-10"><?= htmlspecialchars($user['phone']) ?></p>
                     </div>
                     
-                    <!-- Naviqasiya Menyusu -->
                     <nav class="p-4 space-y-1.5">
                         <a href="?tab=orders" class="<?= $active_tab === 'orders' ? $tab_active_class : $tab_inactive_class ?>">
                             <i class="fa-solid fa-box-open w-5 text-center"></i>
@@ -116,7 +102,6 @@ require_once 'includes/header.php';
                 </div>
             </div>
 
-            <!-- ƏSAS MƏZMUN (Dinamik Tablar) -->
             <div class="flex-1">
                 
                 <?php if($msg === 'success'): ?>
@@ -126,7 +111,6 @@ require_once 'includes/header.php';
                 <?php endif; ?>
 
                 <?php if ($active_tab === 'orders'): ?>
-                    <!-- TAB: SİFARİŞLƏR -->
                     <div class="hidden md:flex justify-between items-end mb-6">
                         <div>
                             <h1 class="text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">Sifariş Tarixçəsi</h1>
@@ -201,7 +185,14 @@ require_once 'includes/header.php';
                                                     <?php foreach($items as $item): ?>
                                                         <li class="flex justify-between items-center text-sm bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
                                                             <div class="flex items-center gap-3">
-                                                                <div class="w-8 h-8 bg-gray-50 rounded flex items-center justify-center text-lg"><?= htmlspecialchars($item['image_url']) ?></div>
+                                                                <!-- Şəkil Məntiqi -->
+                                                                <div class="w-8 h-8 bg-gray-50 rounded overflow-hidden flex items-center justify-center shrink-0">
+                                                                    <?php if(strpos($item['image_url'], 'uploads/') !== false || filter_var($item['image_url'], FILTER_VALIDATE_URL)): ?>
+                                                                        <img src="<?= htmlspecialchars($item['image_url']) ?>" class="w-full h-full object-cover">
+                                                                    <?php else: ?>
+                                                                        <span class="text-lg"><?= htmlspecialchars($item['image_url']) ?></span>
+                                                                    <?php endif; ?>
+                                                                </div>
                                                                 <span class="font-bold text-gray-900"><?= $item['quantity'] ?>x</span>
                                                                 <span class="font-medium text-gray-700"><?= htmlspecialchars($item['name']) ?></span>
                                                             </div>
@@ -219,7 +210,6 @@ require_once 'includes/header.php';
 
 
                 <?php elseif ($active_tab === 'settings'): ?>
-                    <!-- TAB: ŞƏXSİ MƏLUMATLAR (TƏNZİMLƏMƏLƏR) -->
                     <div class="hidden md:flex justify-between items-end mb-6">
                         <div>
                             <h1 class="text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">Şəxsi Məlumatlar</h1>
@@ -237,7 +227,6 @@ require_once 'includes/header.php';
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-phone"></i></span>
                                     <input type="text" value="<?= htmlspecialchars($user['phone']) ?>" disabled class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed font-medium">
                                 </div>
-                                <p class="text-xs text-gray-400 mt-1">Sistemə giriş nömrəsi olduğu üçün dəyişdirilə bilməz.</p>
                             </div>
 
                             <div>
@@ -255,7 +244,6 @@ require_once 'includes/header.php';
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-lock"></i></span>
                                     <input type="password" name="new_password" placeholder="Yeni şifrə daxil edin (İstəyə bağlı)" class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:ring-2 focus:ring-ixlas-100 outline-none transition-all font-medium">
                                 </div>
-                                <p class="text-xs text-gray-400 mt-1">Şifrəni dəyişmək istəmirsinizsə, bu xananı boş saxlayın.</p>
                             </div>
 
                             <div class="pt-4">
@@ -266,9 +254,7 @@ require_once 'includes/header.php';
                         </form>
                     </div>
 
-
                 <?php elseif ($active_tab === 'favorites'): ?>
-                    <!-- TAB: BƏYƏNDİKLƏRİM (Empty State) -->
                     <div class="hidden md:flex justify-between items-end mb-6">
                         <div>
                             <h1 class="text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">Bəyəndiyim Məhsullar</h1>
@@ -287,9 +273,7 @@ require_once 'includes/header.php';
                         </a>
                     </div>
 
-
                 <?php elseif ($active_tab === 'addresses'): ?>
-                    <!-- TAB: ÜNVANLARIM (Empty State) -->
                     <div class="hidden md:flex justify-between items-end mb-6">
                         <div>
                             <h1 class="text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">Qeyd Edilmiş Ünvanlar</h1>
@@ -307,11 +291,8 @@ require_once 'includes/header.php';
                             Sifariş Ver
                         </a>
                     </div>
-
                 <?php endif; ?>
-
             </div>
-            
         </div>
     </div>
 </main>

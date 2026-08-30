@@ -1,7 +1,6 @@
 <?php
 require_once 'config/db.php';
 
-// Məhsulu səbətdən silmək məntiqi
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'remove_item') {
     $remove_id = (int)$_POST['product_id'];
     if (isset($_SESSION['cart'][$remove_id])) {
@@ -17,7 +16,6 @@ $cart_items = [];
 $total_price = 0;
 
 if (!empty($_SESSION['cart'])) {
-    // Səbətdəki ID-ləri vergüllə ayırıb (1,2,3) SQL sorğusuna veririk
     $ids = implode(',', array_keys($_SESSION['cart']));
     $stmt = $pdo->query("SELECT * FROM products WHERE id IN ($ids)");
     
@@ -53,13 +51,17 @@ if (!empty($_SESSION['cart'])) {
         <?php else: ?>
             <div class="flex flex-col lg:flex-row gap-8">
                 
-                <!-- Səbət Elementləri -->
                 <div class="lg:w-2/3 space-y-4">
                     <?php foreach ($cart_items as $item): ?>
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-6 relative group">
                         
-                        <div class="w-24 h-24 bg-gray-50 rounded-xl flex items-center justify-center text-4xl">
-                            <?= htmlspecialchars($item['image_url']) ?>
+                        <!-- Şəkil Məntiqi -->
+                        <div class="w-24 h-24 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                            <?php if(strpos($item['image_url'], 'uploads/') !== false || filter_var($item['image_url'], FILTER_VALIDATE_URL)): ?>
+                                <img src="<?= htmlspecialchars($item['image_url']) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover">
+                            <?php else: ?>
+                                <span class="text-4xl"><?= htmlspecialchars($item['image_url']) ?></span>
+                            <?php endif; ?>
                         </div>
                         
                         <div class="flex-1">

@@ -17,7 +17,6 @@ include 'includes/header.php';
 
 <main class="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
     
-    <!-- Breadcrumb -->
     <div class="flex items-center gap-2 text-sm text-gray-500 mb-8">
         <a href="index.php" class="hover:text-ixlas-600"><i class="fa-solid fa-house"></i></a>
         <i class="fa-solid fa-chevron-right text-[10px]"></i>
@@ -29,12 +28,15 @@ include 'includes/header.php';
     <div class="bg-white rounded-3xl p-6 md:p-10 border border-gray-100 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
             
-            <!-- Şəkil -->
-            <div class="bg-gray-50 rounded-2xl aspect-square flex items-center justify-center text-9xl">
-                <?= $product['image_url'] ?>
+            <!-- Şəkil Məntiqi -->
+            <div class="bg-gray-50 rounded-2xl aspect-square flex items-center justify-center overflow-hidden relative">
+                <?php if(strpos($product['image_url'], 'uploads/') !== false || filter_var($product['image_url'], FILTER_VALIDATE_URL)): ?>
+                    <img src="<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="w-full h-full object-cover">
+                <?php else: ?>
+                    <span class="text-9xl"><?= htmlspecialchars($product['image_url']) ?></span>
+                <?php endif; ?>
             </div>
             
-            <!-- Məlumatlar -->
             <div class="flex flex-col justify-center">
                 <span class="inline-block px-3 py-1 bg-ixlas-50 text-ixlas-600 rounded-full text-xs font-bold mb-4 w-max">
                     Stokda var (<?= $product['stock'] ?> ədəd)
@@ -61,7 +63,6 @@ include 'includes/header.php';
                     </button>
                 </form>
 
-                <!-- Əlavə Üstünlüklər -->
                 <div class="grid grid-cols-2 gap-4 mt-10 pt-8 border-t border-gray-100">
                     <div class="flex items-center gap-3 text-sm font-medium text-gray-600">
                         <div class="w-10 h-10 rounded-full bg-ixlas-50 text-ixlas-600 flex items-center justify-center"><i class="fa-solid fa-truck-fast"></i></div>

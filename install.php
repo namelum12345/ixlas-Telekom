@@ -7,11 +7,11 @@ $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'install') {
     
-    // DB Məlumatları - Coolify parametrləri təyin edildi
-    $db_host = $_POST['db_host'] ?? 'mysql-database-qtz3exgtxznhvv8lwganliae';
-    $db_user = $_POST['db_user'] ?? 'mysql';
-    $db_pass = $_POST['db_pass'] ?? 'Polad.2006';
-    $db_name = $_POST['db_name'] ?? 'default';
+    // DB Məlumatları - Yeni verilmiş parametrlər təyin edildi
+    $db_host = $_POST['db_host'] ?? 'drhggktfagjy5f7ars8tjuc7';
+    $db_user = $_POST['db_user'] ?? 'root';
+    $db_pass = $_POST['db_pass'] ?? 'MCIVUCjuo53EQ0BhOLQLBf3InfONmcQmrK9xad7C2RRwgtQ7JXBcDG9KPldR9EEb';
+    $db_name = $_POST['db_name'] ?? 'ixlas_telekom_db';
     
     // Admin Məlumatları
     $admin_name = $_POST['admin_name'] ?? 'İxlas Telecom';
@@ -235,19 +235,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Host</label>
-                            <input type="text" name="db_host" value="mysql-database-qtz3exgtxznhvv8lwganliae" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="text" name="db_host" value="drhggktfagjy5f7ars8tjuc7" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Baza Adı</label>
-                            <input type="text" name="db_name" value="default" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="text" name="db_name" value="ixlas_telekom_db" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">İstifadəçi (User)</label>
-                            <input type="text" name="db_user" value="mysql" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="text" name="db_user" value="root" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Şifrə</label>
-                            <input type="password" name="db_pass" value="Polad.2006" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
+                            <input type="password" name="db_pass" value="MCIVUCjuo53EQ0BhOLQLBf3InfONmcQmrK9xad7C2RRwgtQ7JXBcDG9KPldR9EEb" required class="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-ixlas-500 focus:bg-white outline-none transition-all text-sm">
                         </div>
                     </div>
 

@@ -3,7 +3,6 @@ require_once 'config/db.php';
 
 $category_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Kateqoriya məlumatını çəkirik
 $stmt = $pdo->prepare("SELECT * FROM categories WHERE id = ?");
 $stmt->execute([$category_id]);
 $category = $stmt->fetch();
@@ -13,7 +12,6 @@ if(!$category) {
     exit;
 }
 
-// Bu kateqoriyaya (və alt kateqoriyalarına) aid aktiv məhsulları çəkirik
 $prod_stmt = $pdo->prepare("SELECT * FROM products WHERE (category_id = ? OR category_id IN (SELECT id FROM categories WHERE parent_id = ?)) AND is_active = 1 AND stock > 0");
 $prod_stmt->execute([$category_id, $category_id]);
 $products = $prod_stmt->fetchAll();
@@ -23,7 +21,6 @@ include 'includes/header.php';
 
 <main class="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
     
-    <!-- Breadcrumb -->
     <div class="flex items-center gap-2 text-sm text-gray-500 mb-6">
         <a href="index.php" class="hover:text-ixlas-600"><i class="fa-solid fa-house"></i></a>
         <i class="fa-solid fa-chevron-right text-[10px]"></i>
@@ -37,12 +34,16 @@ include 'includes/header.php';
         <h2 class="text-3xl font-bold text-gray-900"><?= htmlspecialchars($category['name']) ?></h2>
     </div>
 
-    <!-- Məhsullar Grid -->
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
         <?php foreach($products as $product): ?>
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative flex flex-col h-full">
-                <a href="product.php?id=<?= $product['id'] ?>" class="block mb-4 overflow-hidden rounded-xl bg-gray-50 aspect-square flex items-center justify-center">
-                    <span class="text-6xl transform group-hover:scale-110 transition-transform duration-300"><?= $product['image_url'] ?></span>
+                <!-- Şəkil Məntiqi -->
+                <a href="product.php?id=<?= $product['id'] ?>" class="block mb-4 overflow-hidden rounded-xl bg-gray-50 aspect-square flex items-center justify-center relative">
+                    <?php if(strpos($product['image_url'], 'uploads/') !== false || filter_var($product['image_url'], FILTER_VALIDATE_URL)): ?>
+                        <img src="<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300">
+                    <?php else: ?>
+                        <span class="text-6xl transform group-hover:scale-110 transition-transform duration-300"><?= htmlspecialchars($product['image_url']) ?></span>
+                    <?php endif; ?>
                 </a>
                 
                 <div class="flex-1 flex flex-col">

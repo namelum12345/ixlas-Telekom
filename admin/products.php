@@ -103,7 +103,28 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
 </head>
 <body class="bg-gray-50 flex h-screen overflow-hidden">
     
-    <?php include '../includes/admin_sidebar.php'; ?>
+    <aside class="w-64 bg-ixlas-900 text-white flex flex-col hidden md:flex">
+        <div class="h-16 flex items-center px-6 border-b border-ixlas-700">
+            <span class="text-xl font-bold text-white"><i class="fa-solid fa-signal text-ixlas-400 mr-2"></i>İxlas Admin</span>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="index.php" class="flex items-center gap-3 px-4 py-3 text-ixlas-100 hover:bg-ixlas-800 rounded-xl font-medium transition-colors">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Ümumi Panel
+            </a>
+            <a href="orders.php" class="flex items-center gap-3 px-4 py-3 text-ixlas-100 hover:bg-ixlas-800 rounded-xl font-medium transition-colors">
+                <i class="fa-solid fa-cart-shopping w-5 text-center"></i> Sifarişlər
+            </a>
+            <a href="categories.php" class="flex items-center gap-3 px-4 py-3 text-ixlas-100 hover:bg-ixlas-800 rounded-xl font-medium transition-colors">
+                <i class="fa-solid fa-layer-group w-5 text-center"></i> Kateqoriyalar
+            </a>
+            <a href="products.php" class="flex items-center gap-3 px-4 py-3 bg-ixlas-700 text-white rounded-xl font-bold transition-colors">
+                <i class="fa-solid fa-box-open w-5 text-center"></i> Məhsullar
+            </a>
+            <a href="users.php" class="flex items-center gap-3 px-4 py-3 text-ixlas-100 hover:bg-ixlas-800 rounded-xl font-medium transition-colors">
+                <i class="fa-solid fa-users w-5 text-center"></i> İstifadəçilər
+            </a>
+        </nav>
+    </aside>
 
     <main class="flex-1 flex flex-col h-screen overflow-y-auto">
         <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-0 sticky top-0">
@@ -230,56 +251,10 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
             </div>
             
             <div class="overflow-y-auto p-6 flex-1">
-                <form method="POST" class="space-y-6">
-                    <input type="hidden" name="action" value="add">
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b border-gray-100 pb-2">Ümumi Məlumat</h4>
-                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Məhsulun Adı</label><input type="text" name="name" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Kateqoriya</label>
-                                <select name="category_id" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none bg-white">
-                                    <?php foreach($categories as $cat): ?><option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option><?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="block text-xs font-bold text-gray-700 mb-1">Qiymət (₼)</label><input type="number" step="0.01" name="price" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
-                                <div><label class="block text-xs font-bold text-gray-700 mb-1">Stok (Say)</label><input type="number" name="stock" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
-                            </div>
-                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Şəkil (URL və ya Emoji)</label><input type="text" name="image_url" placeholder="📱" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
-                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Qısa Təsvir</label><textarea name="description" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none resize-none"></textarea></div>
-                        </div>
-
-                        <div class="space-y-4">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b border-gray-100 pb-2">Texniki Spesifikasiyalar (Müqayisə Üçün)</h4>
-                            <div><label class="block text-xs font-bold text-gray-700 mb-1">RAM (məs: 8 GB)</label><input type="text" name="ram" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
-                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Daxili Yaddaş (məs: 256 GB)</label><input type="text" name="storage" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
-                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Prosessor (CPU)</label><input type="text" name="processor" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
-                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Kamera (məs: 50MP + 12MP)</label><input type="text" name="camera" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="pt-6 border-t border-gray-100 mt-6 flex justify-end">
-                        <button type="submit" class="px-8 py-3.5 bg-ixlas-600 text-white font-bold rounded-xl shadow-lg shadow-ixlas-600/30 hover:bg-ixlas-700 transition-colors">Məhsulu Kataloqa Əlavə Et</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- REDAKTƏ ET MODALI -->
-    <div id="edit-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50/30">
-                <h3 class="font-bold text-gray-900 text-lg">Məhsulu Redaktə Et</h3>
-                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-900"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            
-            <div class="overflow-y-auto p-6 flex-1">
-                <form method="POST" class="space-y-6">
+                <form method="POST" enctype="multipart/form-data" class="space-y-6">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="product_id" id="edit_product_id" value="">
+                    <input type="hidden" name="existing_image" id="edit_existing_image" value="">
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
@@ -295,7 +270,11 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
                                 <div><label class="block text-xs font-bold text-gray-700 mb-1">Qiymət (₼)</label><input type="number" step="0.01" name="price" id="edit_price" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
                                 <div><label class="block text-xs font-bold text-gray-700 mb-1">Stok (Say)</label><input type="number" name="stock" id="edit_stock" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
                             </div>
-                            <div><label class="block text-xs font-bold text-gray-700 mb-1">Şəkil (URL və ya Emoji)</label><input type="text" name="image_url" id="edit_image_url" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none"></div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Yeni Şəkil Seçin (İstəyə bağlı)</label>
+                                <input type="file" name="image_file" accept="image/*" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none bg-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer transition-all">
+                                <p class="text-[10px] text-gray-400 mt-1">Yeni şəkil seçməsəniz, məhsulun əvvəlki şəkli qalacaq.</p>
+                            </div>
                             <div><label class="block text-xs font-bold text-gray-700 mb-1">Qısa Təsvir</label><textarea name="description" id="edit_description" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-ixlas-500 outline-none resize-none"></textarea></div>
                         </div>
 
@@ -322,6 +301,7 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
         function openEditModal(btn) {
             const ds = btn.dataset;
             document.getElementById('edit_product_id').value = ds.id;
+            document.getElementById('edit_existing_image').value = ds.img;
             document.getElementById('edit_name').value = ds.name;
             document.getElementById('edit_category_id').value = ds.cat;
             document.getElementById('edit_price').value = ds.price;
